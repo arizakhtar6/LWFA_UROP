@@ -40,7 +40,7 @@ Rmax = 1*um
 nx = int(Lx/dx)
 nr = int(Rmax/dr)
 
-dt = 0.98/(np.sqrt(1/dx**2 + 1/dr**2))
+dt = 0.85/(np.sqrt(1/dx**2 + 1/dr**2))
 
 cell_length = [dx, dr]
 grid_length = [Lx, Rmax]
@@ -88,7 +88,7 @@ t_sim_ps = t_ps - t_start_ps
 
 laser_time = t_sim_ps*1e-12*omega0
 
-simulation_time_ps = 1.0
+simulation_time_ps = 0.01 # CHANGE BACK TO 1
 
 def gemini_envelope(t):
 
@@ -117,6 +117,16 @@ def cluster_profile(x, r):
         return cluster_density
 
     return 0.0
+
+# cluster_density = 91.0
+# cluster_radius = 0.01*um
+# cluster_length = 0.02*um
+# cluster_x = 0.5 * Lx
+
+# def cluster_profile(x, r):
+#     if abs(x - cluster_x) <= cluster_length/2 and r <= cluster_radius:
+#         return cluster_density
+#     return 0.0
     
 
 def carbon_profile(x, r):
@@ -139,14 +149,13 @@ EM_boundary_conditions = [["silver-muller", "silver-muller"], ["buneman", "bunem
 Main(
     geometry = "AMcylindrical",
     number_of_AM = 2, # when changed to 1 it runs?
-    interpolation_order = 1,
     timestep = dt,
     simulation_time = simulation_time_ps*1e-12*omega0,
     cell_length = [dx, dr],
     grid_length = [Lx, Rmax], 
     number_of_patches = [n_patch_x, n_patch_r],
     EM_boundary_conditions = EM_boundary_conditions,
-    print_every = 10000,
+    print_every = 1000,
     reference_angular_frequency_SI = omega0,
 )
 
@@ -168,7 +177,7 @@ Species(
     name="carbon_clusters",
     position_initialization="random",
     momentum_initialization="cold",
-    particles_per_cell=4,
+    particles_per_cell=1,
     atomic_number=6,
     mass=12*1836,
     charge=0.0,
@@ -185,7 +194,7 @@ Species(
     name="hydrogen_clusters",
     position_initialization="random",
     momentum_initialization="cold",
-    particles_per_cell=4,
+    particles_per_cell=1,
     atomic_number=1,
     mass=1836,
     charge=0.0,
@@ -263,76 +272,76 @@ DiagFields(
     fields=["Rho", "Er", "Et", "Rho_cluster_electrons"]
 )
 
-DiagParticleBinning(
-    deposited_quantity = "weight",
-    every = 1000,
-    flush_every = 10000,
-    species = ["cluster_electrons"],
-    axes = [
-        ["ekin", 0, 1000, 300]
-    ]
-)
+# DiagParticleBinning(
+#     deposited_quantity = "weight",
+#     every = 1000,
+#     flush_every = 10000,
+#     species = ["cluster_electrons"],
+#     axes = [
+#         ["ekin", 0, 1000, 300]
+#     ]
+# )
 
-DiagParticleBinning(
-    deposited_quantity = "weight",
-    every = 1000,
-    flush_every = 10000,
-    species = ["cluster_electrons"],
-    axes = [
-    ["x", 0, Lx, 64],
-    ["y", 0, Rmax, 64]
-]
-)
+# DiagParticleBinning(
+#     deposited_quantity = "weight",
+#     every = 1000,
+#     flush_every = 10000,
+#     species = ["cluster_electrons"],
+#     axes = [
+#     ["x", 0, Lx, 64],
+#     ["y", 0, Rmax, 64]
+# ]
+# )
 
-# Carbon ion density evolution
+# # Carbon ion density evolution
 
-DiagParticleBinning(
-    deposited_quantity="weight",
-    every=1000,
-    flush_every=10000,
-    species=["carbon_clusters"],
-    axes = [
-    ["x", 0, Lx, 64],
-    ["y", 0, Rmax, 64]
-]
-)
-
-
-# Hydrogen ion density evolution
-
-DiagParticleBinning(
-    deposited_quantity="weight",
-    every=1000,
-    flush_every=10000,
-    species=["hydrogen_clusters"],
-    axes = [
-    ["x", 0, Lx, 64],
-    ["y", 0, Rmax, 64]
-]
-)
-
-DiagTrackParticles(
-    species="cluster_electrons",
-    every=1000,
-    flush_every=2000,
-    attributes=["x", "y", "px", "py", "pz", "charge", "weight"]
-)
-
-DiagTrackParticles(
-    species="carbon_clusters",
-    every=1000,
-    flush_every=2000,
-    attributes=["x", "y", "px", "py", "pz", "charge", "weight"]
-)
-
-DiagTrackParticles(
-    species="hydrogen_clusters",
-    every=1000,
-    flush_every=2000,
-    attributes=["x", "y", "px", "py", "pz", "charge", "weight"]
-)
+# DiagParticleBinning(
+#     deposited_quantity="weight",
+#     every=1000,
+#     flush_every=10000,
+#     species=["carbon_clusters"],
+#     axes = [
+#     ["x", 0, Lx, 64],
+#     ["y", 0, Rmax, 64]
+# ]
+# )
 
 
-DiagScalar(every=1000)
+# # Hydrogen ion density evolution
+
+# DiagParticleBinning(
+#     deposited_quantity="weight",
+#     every=1000,
+#     flush_every=10000,
+#     species=["hydrogen_clusters"],
+#     axes = [
+#     ["x", 0, Lx, 64],
+#     ["y", 0, Rmax, 64]
+# ]
+# )
+
+# DiagTrackParticles(
+#     species="cluster_electrons",
+#     every=1000,
+#     flush_every=2000,
+#     attributes=["x", "y", "px", "py", "pz", "charge", "weight"]
+# )
+
+# DiagTrackParticles(
+#     species="carbon_clusters",
+#     every=1000,
+#     flush_every=2000,
+#     attributes=["x", "y", "px", "py", "pz", "charge", "weight"]
+# )
+
+# DiagTrackParticles(
+#     species="hydrogen_clusters",
+#     every=1000,
+#     flush_every=2000,
+#     attributes=["x", "y", "px", "py", "pz", "charge", "weight"]
+# )
+
+
+# DiagScalar(every=1000)
 
 DiagPerformances(every=10000)
